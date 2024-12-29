@@ -1,0 +1,167 @@
+ {
+   "$schema": "http://json-schema.org/draft-07/schema#",
+   "$id": "http://example.com/root.json",
+   "type": "object",
+   "title": "ATR model metadata schema",
+   "required": [
+     "id",
+     "authors",
+     "summary",
+     "license",
+     "license_name",
+     "license_link",
+     "software_name",
+     "software_hints",
+     "language",
+     "script",
+     "tags",
+     "datasets",
+     "model_type",
+     "metrics",
+     "base_model"
+   ],
+   "properties": {
+     "authors": {
+       "$id": "#/properties/authors",
+       "type": "array",
+       "title": "Authors of the model",
+       "items": {
+         "$id": "#/properties/authors/items",
+         "type": "object",
+         "title": "items",
+         "required": ["name"],
+         "properties": {
+           "name": {
+             "$id": "#/properties/authors/items/properties/name",
+             "type": "string",
+             "title": "A single author's name"
+           },
+           "affiliation": {
+             "$id": "#/properties/authors/items/properties/affiliation",
+             "type": "string",
+             "title": "A single author's institutional affiliation"
+           }
+         }
+       }
+     },
+     "id": {
+       "$id": "#/properties/id",
+       "type": "string",
+       "title": "Persistent identifier of the model."
+     },
+     "summary": {
+       "$id": "#/properties/summary",
+       "type": "string",
+       "title": "A one-line summary of the model"
+     },
+     "license": {
+       "$id": "#/properties/license",
+       "type": "string",
+       "title": "License of the model",
+       "default": "Apache-2.0",
+       "enum": ["AAL", "AFL-3.0", "AGPL-3.0", "APL-1.0", "APSL-2.0", "Against-DRM", "Apache-1.1", "Apache-2.0", "Artistic-2.0", "BSD-2-Clause", "BSD-3-Clause", "BSL-1.0", "BitTorrent-1.1", "CATOSL-1.1", "CC-BY-4.0", "CC-BY-NC-4.0", "CC-BY-SA-4.0", "CC0-1.0", "CDDL-1.0", "CECILL-2.1", "CNRI-Python", "CPAL-1.0", "CUA-OPL-1.0", "DSL", "ECL-2.0", "EFL-2.0", "EPL-1.0", "EPL-2.0", "EUDatagrid", "EUPL-1.1", "Entessa", "FAL-1.3", "Fair", "Frameworx-1.0", "GFDL-1.3-no-cover-texts-no-invariant-sections", "GPL-2.0", "GPL-3.0", "HPND", "IPA", "IPL-1.0", "ISC", "Intel", "LGPL-2.1", "LGPL-3.0", "LO-FR-2.0", "LPL-1.0", "LPL-1.02", "LPPL-1.3c", "MIT", "MPL-1.0", "MPL-1.1", "MPL-2.0", "MS-PL", "MS-RL", "MirOS", "Motosoto", "Multics", "NASA-1.3", "NCSA", "NGPL", "NPOSL-3.0", "NTP", "Naumen", "Nokia", "OCLC-2.0", "ODC-BY-1.0", "ODbL-1.0", "OFL-1.1", "OGL-Canada-2.0", "OGL-UK-1.0", "OGL-UK-2.0", "OGL-UK-3.0", "OGTSL", "OSL-3.0", "PDDL-1.0", "PHP-3.0", "PostgreSQL", "Python-2.0", "QPL-1.0", "RPL-1.5", "RPSL-1.0", "RSCPL", "SISSL", "SPL-1.0", "SimPL-2.0", "Sleepycat", "Talis", "Unlicense", "VSL-1.0", "W3C", "WXwindows", "Watcom-1.0", "Xnet", "ZPL-2.0", "Zlib", "dli-model-use", "geogratis", "hesa-withrights", "localauth-withrights", "met-office-cp", "mitre", "notspecified", "other-at", "other-closed", "other-nc", "other-open", "other-pd", "ukclickusepsi", "ukcrown", "ukcrown-withrights", "ukpsi"]
+     },
+     "license_name": {
+       "$id": "#/properties/license_name",
+       "type": "string",
+       "title": "Name of the license if license == 'other-*'"
+     },
+     "license_link": {
+       "$id": "#/properties/license_link",
+       "type": "string",
+       "title": "Link to the license text if license == 'other-*'"
+     },
+     "software_name": {
+       "$id": "#/properties/software_name",
+       "type": "string",
+       "title": "Name of the software this model can be used with."
+     },
+     "software_hints": {
+       "$id": "#/properties/software_hints",
+       "type": "array",
+       "minItems": 0,
+       "title": "Free text fields, e.g. version, that allows the software in software_name to determine model compatibility.",
+       "items": {
+         "$id": "#/properties/software_hints/items",
+         "type": "string"
+       }
+     },
+    "language": {
+       "$id": "#/properties/language",
+       "type": "array",
+       "uniqueItems": true,
+       "minItems": 1,
+       "title": "ISO 639-3 codes for languages the model has been trained on.",
+       "items": {
+         "$id": "#/properties/language/items",
+         "type": "string",
+	 "pattern": "^[a-z]{3}"
+       }
+     },
+    "script": {
+       "$id": "#/properties/script",
+       "type": "array",
+       "uniqueItems": true,
+       "minItems": 1,
+       "title": "ISO 15924 codes for scripts the model has been trained on.",
+       "items": {
+         "$id": "#/properties/script/items",
+         "type": "string",
+         "enum": ["Tang", "Xsux", "Xpeo", "Blis", "Ugar", "Egyp", "Brai", "Egyh", "Loma", "Egyd", "Hluw", "Maya", "Sgnw", "Inds", "Mero", "Merc", "Sarb", "Narb", "Roro", "Phnx", "Lydi", "Tfng", "Samr", "Armi", "Hebr", "Palm", "Hatr", "Prti", "Phli", "Phlp", "Phlv", "Avst", "Syrc", "Syrn", "Syrj", "Syre", "Mani", "Mand", "Mong", "Nbat", "Arab", "Aran", "Nkoo", "Adlm", "Thaa", "Orkh", "Hung", "Grek", "Cari", "Lyci", "Copt", "Goth", "Ital", "Runr", "Ogam", "Latn", "Latg", "Latf", "Moon", "Osge", "Cyrl", "Cyrs", "Glag", "Elba", "Perm", "Armn", "Aghb", "Geor", "Geok", "Dupl", "Dsrt", "Bass", "Osma", "Olck", "Wara", "Pauc", "Mroo", "Medf", "Visp", "Shaw", "Plrd", "Jamo", "Bopo", "Hang", "Kore", "Kits", "Teng", "Cirt", "Sara", "Piqd", "Brah", "Sidd", "Khar", "Guru", "Gong", "Gonm", "Mahj", "Deva", "Sylo", "Kthi", "Sind", "Shrd", "Gujr", "Takr", "Khoj", "Mult", "Modi", "Beng", "Tirh", "Orya", "Dogr", "Soyo", "Tibt", "Phag", "Marc", "Newa", "Bhks", "Lepc", "Limb", "Mtei", "Ahom", "Zanb", "Telu", "Gran", "Saur", "Knda", "Taml", "Mlym", "Sinh", "Cakm", "Mymr", "Lana", "Thai", "Tale", "Talu", "Khmr", "Laoo", "Kali", "Cham", "Tavt", "Bali", "Java", "Sund", "Rjng", "Leke", "Batk", "Maka", "Bugi", "Tglg", "Hano", "Buhd", "Tagb", "Qaaa", "Sora", "Lisu", "Lina", "Linb", "Cprt", "Hira", "Kana", "Hrkt", "Jpan", "Nkgb", "Ethi", "Bamu", "Kpel", "Qabx", "Mend", "Afak", "Cans", "Cher", "Hmng", "Yiii", "Vaii", "Wole", "Zsye", "Zinh", "Zmth", "Zsym", "Zxxx", "Zyyy", "Zzzz", "Nshu", "Hani", "Hans", "Hant", "Hanb", "Kitl", "Jurc"]
+       }
+    },
+    "tags": {
+       "$id": "#/properties/tags",
+       "type": "array",
+       "uniqueItems": true,
+       "minItems": 0,
+       "title": "List of tags associated with the model.",
+       "items": {
+         "$id": "#/properties/tags/items",
+         "type": "string"
+       }
+     },
+    "datasets": {
+       "$id": "#/properties/datasets",
+       "type": "array",
+       "uniqueItems": true,
+       "minItems": 0,
+       "title": "List of datasets the model has been trained on. Use URLs/PIDs if possible.",
+       "items": {
+         "$id": "#/properties/dataset/items",
+         "type": "string"
+       }
+     },
+    "model_type": {
+       "$id": "#/properties/model_type",
+       "type": "array",
+       "uniqueItems": true,
+       "minItems": 1,
+       "title": "Function(s) performed by the model, e.g. `recognition`, `segmentation`, `end-to-end`, `reading order`.",
+       "items": {
+         "$id": "#/properties/model_type/items",
+         "type": "string"
+       }
+     },
+    "metrics": {
+       "$id": "#/properties/metrics",
+       "type": "object",
+       "title": "",
+       "properties": {
+         "$id": "#/properties/metrics/properties"
+       }
+     },
+
+     "base_model": {
+       "$id": "#/properties/base_model",
+       "type": "array",
+       "uniqueItems": true,
+       "minItems": 0,
+       "title": "Base model this model has been fine-tuned from. Can be more than one in case of merges.",
+       "items": {
+         "$id": "#/properties/base_model/items",
+         "type": "string"
+       }
+     }
+  }
+}

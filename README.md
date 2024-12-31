@@ -1,7 +1,7 @@
 # HTRMoPo
 
-HTRMoPo is a intended to provide a schema for automatic text recognition model
-repositories that enables discoverability and aids in model selection.
+HTRMoPo is intended to provide a schema for automatic text recognition model
+repositories that enables discoverability and aid in model selection.
 
 There are two versions of the schema: `v0` and `v1`. `v0` is the legacy kraken
 model schema for the Zenodo repository that is fairly limited, in particular by

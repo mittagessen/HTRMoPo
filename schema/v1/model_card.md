@@ -27,6 +27,8 @@ model_type:  # List of one or more functions this model performs.
 metrics:  # Undefined dictionary mapping validation/test metrics to values
   {metric_0}: {metric_val_0}  # Example: cer: 0.01
   {metric_1}: {metric_val_1}  # Example: wer: 0.05
+datasets:
+- {dataset_0}  # Example: https://github.com/OpenITI/arabic_print_data.git
 base_model:  # base model this model has been fine-tuned on. Might be more than one. Should be PIDs/URLs
 - {base_model_0}  # Example: https://github.com/mittagessen/bytellama
 ---

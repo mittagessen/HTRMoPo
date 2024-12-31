@@ -8,17 +8,10 @@
      "authors",
      "summary",
      "license",
-     "license_name",
-     "license_link",
      "software_name",
-     "software_hints",
      "language",
      "script",
-     "tags",
-     "datasets",
-     "model_type",
-     "metrics",
-     "base_model"
+     "model_type"
    ],
    "properties": {
      "authors": {
@@ -40,6 +33,11 @@
              "$id": "#/properties/authors/items/properties/affiliation",
              "type": "string",
              "title": "A single author's institutional affiliation"
+           },
+           "orcid": {
+             "$id": "#/properties/authors/items/properties/orcid",
+             "type": "string",
+             "title": "A single author's ORCID"
            }
          }
        }
@@ -110,14 +108,14 @@
          "enum": ["Tang", "Xsux", "Xpeo", "Blis", "Ugar", "Egyp", "Brai", "Egyh", "Loma", "Egyd", "Hluw", "Maya", "Sgnw", "Inds", "Mero", "Merc", "Sarb", "Narb", "Roro", "Phnx", "Lydi", "Tfng", "Samr", "Armi", "Hebr", "Palm", "Hatr", "Prti", "Phli", "Phlp", "Phlv", "Avst", "Syrc", "Syrn", "Syrj", "Syre", "Mani", "Mand", "Mong", "Nbat", "Arab", "Aran", "Nkoo", "Adlm", "Thaa", "Orkh", "Hung", "Grek", "Cari", "Lyci", "Copt", "Goth", "Ital", "Runr", "Ogam", "Latn", "Latg", "Latf", "Moon", "Osge", "Cyrl", "Cyrs", "Glag", "Elba", "Perm", "Armn", "Aghb", "Geor", "Geok", "Dupl", "Dsrt", "Bass", "Osma", "Olck", "Wara", "Pauc", "Mroo", "Medf", "Visp", "Shaw", "Plrd", "Jamo", "Bopo", "Hang", "Kore", "Kits", "Teng", "Cirt", "Sara", "Piqd", "Brah", "Sidd", "Khar", "Guru", "Gong", "Gonm", "Mahj", "Deva", "Sylo", "Kthi", "Sind", "Shrd", "Gujr", "Takr", "Khoj", "Mult", "Modi", "Beng", "Tirh", "Orya", "Dogr", "Soyo", "Tibt", "Phag", "Marc", "Newa", "Bhks", "Lepc", "Limb", "Mtei", "Ahom", "Zanb", "Telu", "Gran", "Saur", "Knda", "Taml", "Mlym", "Sinh", "Cakm", "Mymr", "Lana", "Thai", "Tale", "Talu", "Khmr", "Laoo", "Kali", "Cham", "Tavt", "Bali", "Java", "Sund", "Rjng", "Leke", "Batk", "Maka", "Bugi", "Tglg", "Hano", "Buhd", "Tagb", "Qaaa", "Sora", "Lisu", "Lina", "Linb", "Cprt", "Hira", "Kana", "Hrkt", "Jpan", "Nkgb", "Ethi", "Bamu", "Kpel", "Qabx", "Mend", "Afak", "Cans", "Cher", "Hmng", "Yiii", "Vaii", "Wole", "Zsye", "Zinh", "Zmth", "Zsym", "Zxxx", "Zyyy", "Zzzz", "Nshu", "Hani", "Hans", "Hant", "Hanb", "Kitl", "Jurc"]
        }
     },
-    "tags": {
+    "keywords": {
        "$id": "#/properties/tags",
        "type": "array",
        "uniqueItems": true,
        "minItems": 0,
-       "title": "List of tags associated with the model.",
+       "title": "List of keywords associated with the model.",
        "items": {
-         "$id": "#/properties/tags/items",
+         "$id": "#/properties/keywords/items",
          "type": "string"
        }
      },
@@ -146,12 +144,9 @@
     "metrics": {
        "$id": "#/properties/metrics",
        "type": "object",
-       "title": "",
-       "properties": {
-         "$id": "#/properties/metrics/properties"
-       }
+       "title": "A dictionary of metrics, e.g. {'cer': 4.12, 'wer': 6.8}",
+       "additionalProperties": { "type": "number" }
      },
-
      "base_model": {
        "$id": "#/properties/base_model",
        "type": "array",

@@ -112,6 +112,7 @@ class v1RepositoryRecord:
     software_name: str
     script: List[str]
     language: List[str]
+    publication_date: 'datetime.datetime'
     distribution: List[DistributionDict]
     model_type: List[str]
     license_url: Optional[str] = None
@@ -139,6 +140,7 @@ class v0RepositoryRecord:
     script: List[str]
     distribution: List[DistributionDict]
     graphemes: List[str]
+    publication_date: 'datetime.datetime'
     model_type: List[str] = field(default_factory=lambda: ['recognition'])
     keywords: Optional[List[str]] = None
     version: str = 'v0'

@@ -29,8 +29,10 @@ from urllib.parse import urlsplit
 from platformdirs import user_data_dir
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
+from dateutil.parser import parse as date_parse
 
 from typing import TYPE_CHECKING, Any, Callable, Optional, Literal, Union, Dict
+
 
 from htrmopo.record import DCATRecord, v0RepositoryRecord, v1RepositoryRecord
 from htrmopo.util import _yaml_regex, _v1_schema, _v0_schema, _doi_to_oai_id
@@ -165,7 +167,7 @@ def get_description(model_id: str,
     try:
         record = sickle.GetRecord(identifier=oai_id, metadataPrefix='dcat')
     except Exception:
-        raise ValueError(f'Invalid DOI {model_id}')
+        raise ValueError(f'DOI {model_id} not in repository.')
 
     callback()
     repo_record = None
@@ -180,6 +182,7 @@ def get_description(model_id: str,
             r = requests.get(file['url'])
             r.raise_for_status()
             metadata = record.metadata.copy()
+            metadata['publication_date'] = date_parse(record.header.datestamp)
             try:
                 repo_record = _build_v1_record(metadata, r.content.decode('utf-8'))
             except Exception as e:
@@ -191,13 +194,14 @@ def get_description(model_id: str,
             r = requests.get(file['url'])
             r.raise_for_status()
             metadata = record.metadata.copy()
+            metadata['publication_date'] = date_parse(record.header.datestamp)
             try:
                 repo_record = _build_v0_record(metadata, r)
             except Exception as e:
                 logger.info(f'Invalid metadata for {doi}: {e}')
 
     if not repo_record:
-        raise Exception(f"No metadata found for \'{model_id}\'")
+        raise ValueError(f"No metadata found for \'{model_id}\'")
     return repo_record
 
 
@@ -224,6 +228,7 @@ def get_listing(callback: Callable[[int, int], Any] = lambda total, advance: Non
                 r = requests.get(file_url['url'])
                 r.raise_for_status()
                 metadata = record.metadata.copy()
+                metadata['publication_date'] = date_parse(record.header.datestamp)
                 try:
                     items[doi]['v1'] = _build_v1_record(metadata, r.content.decode('utf-8'))
                 except Exception as e:
@@ -232,6 +237,7 @@ def get_listing(callback: Callable[[int, int], Any] = lambda total, advance: Non
                 r = requests.get(file_url['url'])
                 r.raise_for_status()
                 metadata = record.metadata.copy()
+                metadata['publication_date'] = date_parse(record.header.datestamp)
                 try:
                     items[doi]['v0'] = _build_v0_record(metadata, r)
                 except Exception as e:

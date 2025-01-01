@@ -109,7 +109,7 @@ def get_model(model_id: str,
         The output path under which the model files have been placed.
     """
     if path is not None:
-        path = Path(path)
+        path = Path(path).resolve()
     else:
         path = Path(user_data_dir('htrmopo')) / str(uuid.uuid5(uuid.NAMESPACE_DNS, model_id))
 

@@ -196,28 +196,25 @@ def list_models(ctx, from_date):
 
 @cli.command('get')
 @click.pass_context
+@click.option('-o', '--output', show_default=True,
+              type=click.Path(file_okay=False, writable=True), help='Model card file for the model.')
 @click.argument('model_id')
-def get(ctx, model_id):
+def get(ctx, output, model_id):
     """
     Retrieves a model from the repository.
     """
-    from kraken import repo
-    from kraken.lib.progress import KrakenDownloadProgressBar
+    from htrmopo import get_model
 
-    try:
-        os.makedirs(click.get_app_dir(APP_NAME))
-    except OSError:
-        pass
-
-    with KrakenDownloadProgressBar() as progress:
-        download_task = progress.add_task('Processing', total=0, visible=True if not ctx.meta['verbose'] else False)
-        filename = repo.get_model(model_id, click.get_app_dir(APP_NAME),
-                                  lambda total, advance: progress.update(download_task, total=total, advance=advance))
+    with Progress() as progress:
+        download_task = progress.add_task('Processing', total=0, visible=True)
+        filename = get_model(model_id,
+                             output,
+                             lambda total, advance: progress.update(download_task, total=total, advance=advance))
     message(f'Model name: {filename}')
     ctx.exit(0)
 
 
-@click.command('publish')
+@cli.command('publish')
 @click.pass_context
 @click.option('-i', '--metadata', show_default=True,
               type=click.File(mode='r', lazy=True), help='Model card file for the model.')

@@ -27,15 +27,42 @@ is inspired by the huggingface example template but in principle model cards
 are free form. The front matter can be validated against a JSON schema found
 [here](schema/v1/metadata.schema.json).
 
+## How does it work ?
+
+Install the python library and prepare a model card for your ATR model, no
+matter of segmentation, recognition, reading order, postcorrection, ....
+Afterwards you need to create an account on [Zenodo](https://zenodo.org) and
+create an API access token as described
+[here](https://developers.zenodo.org/#creating-a-personal-access-token).
+
+With the HTRMoPo reference implementation and the access token you can then
+create model deposits on Zenodo. Deposits will be immediately accessible to the
+whole world but won't be discoverable until the community inclusion request is
+manually approved by one of the repository administrators.
+
+Using a research data infrastructure like Zenodo assures long-term
+accessibility of the deposited models while also enabling good scientific
+practices like reproducibility and crediting contributions.
+
+## Deposits
+
+Each model 
+
 ## Python Library
 
 A reference implementation to interact with the repository on Zenodo is in the
 htrmopo directory, containing both a python library and command line drivers.
 
+The library can be installed using pip:
+
+    ~> pip install htrmopo
+
 ### CLI
 
 The `htrmopo` command line tool is used to query the repository, download
 existing models, and upload and update items to it.
+
+#### Querying the repository
 
 To get a listing of all models:
 
@@ -75,7 +102,13 @@ To get a listing of all models:
     │ 10.5281/zenodo.7234165      │                                                                                                                                           │             │                                                                                                          │
     ....
 
-Records are represented in a tree structure in the left-most column. The DOI at the root of each tree is a [concept DOI](https://zenodo.org/help/versioning) which always links to the most recent version of a model. The leaves of the tree are particular versions of the record ordered chronologically. Either type of DOI is acceptable as arguments for the functions below although it is recommended to reference a concrete version in contexts where reproducibility is desired.
+Records are represented in a tree structure in the left-most column. The DOI at
+the root of each tree is a [concept DOI](https://zenodo.org/help/versioning)
+which always links to the most recent version of a model. The leaves of the
+tree are particular versions of the record ordered chronologically. Either type
+of DOI is acceptable as arguments for the functions below although it is
+recommended to reference a concrete version in contexts where reproducibility
+is desired.
 
 To fetch the metadata for a single model (both v0 and v1 schema):
 
@@ -111,8 +144,30 @@ Downloading a single model:
     Processing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
     Model name: /home/mittagessen/.local/share/htrmopo/0ac39ba5-8f85-5ea1-913a-f84a13ca756f
 
-Models are placed per default in reproducible locations in the application state dir printed after the download is finished. The `-o` option allows customization of that behavior:
+Models are placed per default in reproducible locations in the application
+state dir printed after the download is finished. The `-o` option allows
+customization of that behavior:
 
     ~> htrmopo get -o manu 10.5281/zenodo.7547437
     Processing ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
     Model name: /home/mittagessen/manu
+
+#### Publishing models
+
+There are two modes of publishing ATR models with the `htrmopo` command. The
+first creates new stand-alone deposits while the second one creates a new
+version of an existing record that will all be grouped under the same concept
+DOI. Updating a model deposit is usually done when a prior model is retrained
+with additional training data, the metadata has been refined, or additional
+evaluation has been done.
+
+The calls for both modes are very similar, the only difference being `-d`
+option giving the DOI of an existing model deposit in the repository:
+
+    ~> htrmopo publish -i model_card.md -a ${ACCESS_TOKEN} model_dir
+    Uploading ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
+    model PID: 10.5072/zenodo.146629
+ 
+    ~> htrmopo publish -d 10.5072/zenodo.146502 -i model_card.md -a ${ACCESS_TOKEN} model_dir
+    Uploading ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
+    model PID: 10.5072/zenodo.146627

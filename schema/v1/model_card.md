@@ -5,9 +5,7 @@ summary: {summary_0}  # A one-line summary of the model
 authors:
   - name: {name_0}
     affiliation: {affiliation_0}  # Affiliation is optional.
-    role: {role_0}  # Roles are optional
   - name: {name_1}
-    role: {role_1}
 license: {license_0}  # Example: Apache-2.0
 license_name: {license_name_0}  # When license == 'other-*' give your license name here
 license_link: {license_link_0}  # When license == 'other-*' give the location of the full license text here.

@@ -178,17 +178,12 @@ def list_models(ctx, from_date):
     for k, v in concepts.items():
         records = [repository[x]['v1'] if 'v1' in repository[x] else repository[x]['v0'] for x in v]
         records = sorted(records, key=lambda x: x.publication_date, reverse=True)
-        tree_node = k if len(records) > 1 else v[0]
-        t = Tree(tree_node)
-        if len(records) > 1:
-            [t.add(x.doi) for x in records]
-            prefix = ['']
-        else:
-            prefix = []
+        t = Tree(k)
+        [t.add(x.doi) for x in records]
         table.add_row(t,
-                      Group(*prefix + [x.summary for x in records]),
-                      Group(*prefix + ['; '.join(x.model_type) for x in records]),
-                      Group(*prefix + ['; '.join(x.keywords) for x in records]))
+                      Group(*['']+ [x.summary for x in records]),
+                      Group(*[''] + ['; '.join(x.model_type) for x in records]),
+                      Group(*[''] + ['; '.join(x.keywords) for x in records]))
 
     print(table)
     ctx.exit(0)

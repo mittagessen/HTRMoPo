@@ -40,7 +40,7 @@ from htrmopo.util import _yaml_regex, _v1_schema, _v0_schema, _doi_to_oai_id, _d
 if TYPE_CHECKING:
     from os import PathLike
 
-__all__ = ['get_model', 'get_description', 'get_listing', 'publish_model']
+__all__ = ['get_model', 'get_description', 'get_listing']
 
 logger = logging.getLogger(__name__)
 

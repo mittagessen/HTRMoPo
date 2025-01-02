@@ -1,7 +1,8 @@
 import re
 import json
 import unicodedata
-import importlib_resources
+
+from importlib import resources
 
 _yaml_delim = r'(?:---|\+\+\+)'
 _yaml = r'(.*?)'
@@ -9,13 +10,13 @@ _content = r'\s*(.+)$'
 _re_pattern = r'^\s*' + _yaml_delim + _yaml + _yaml_delim + _content
 _yaml_regex = re.compile(_re_pattern, re.S | re.M)
 
-with open(importlib_resources.files('htrmopo').joinpath('v1.metadata.schema.json')) as fp:
+with open(resources.files('htrmopo').joinpath('v1.metadata.schema.json')) as fp:
     _v1_schema = json.load(fp)
 
-with open(importlib_resources.files('htrmopo').joinpath('v0.metadata.schema.json')) as fp:
+with open(resources.files('htrmopo').joinpath('v0.metadata.schema.json')) as fp:
     _v0_schema = json.load(fp)
 
-with open(importlib_resources.files('htrmopo').joinpath('iso15924.txt')) as fp:
+with open(resources.files('htrmopo').joinpath('iso15924.txt')) as fp:
     _iso15924 = {}
     for line in fp.readlines():
         try:
@@ -24,7 +25,7 @@ with open(importlib_resources.files('htrmopo').joinpath('iso15924.txt')) as fp:
         except Exception:
             continue
 
-with open(importlib_resources.files('htrmopo').joinpath('iso639-3.txt')) as fp:
+with open(resources.files('htrmopo').joinpath('iso639-3.txt')) as fp:
     _iso639_3 = {}
     for line in fp.readlines()[1:]:
         try:

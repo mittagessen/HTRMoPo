@@ -15,7 +15,6 @@
 """
 Accessors to the v2 model repository on zenodo.
 """
-import re
 import yaml
 import uuid
 import logging
@@ -28,7 +27,6 @@ from sickle import Sickle
 from urllib.parse import urlsplit
 from platformdirs import user_data_dir
 from jsonschema import validate
-from jsonschema.exceptions import ValidationError
 from dateutil.parser import parse as date_parse
 
 from typing import TYPE_CHECKING, Any, Callable, Optional, Literal, Union, Dict
@@ -56,7 +54,7 @@ def _build_v0_record(metadata, request):
     try:
         json_metadata = request.json()
     except Exception:
-        raise Exception(f'Metadata for \'{record["metadata"]["title"]}\' ({record["metadata"]["doi"]}) not in JSON format')
+        raise Exception(f'Metadata for {metadata["doi"]} not in JSON format')
     validate(json_metadata, _v0_schema)
     metadata.update(json_metadata)
     metadata['creators'].extend(metadata['authors'])
@@ -73,7 +71,7 @@ def _build_v1_record(metadata, model_card):
     try:
         yaml_metadata = yaml.safe_load(header)
     except Exception:
-        raise Exception(f'Metadata for {doi} not in YAML format')
+        raise Exception(f'Metadata for {metadata["doi"]} not in YAML format')
     validate(yaml_metadata, _v1_schema)
     metadata.update(yaml_metadata)
     if metadata['license'].startswith('other'):
@@ -113,7 +111,7 @@ def get_model(model_id: str,
         raise ValueError(f'{model_id} is not a valid DOI')
     try:
         record = sickle.GetRecord(identifier=oai_id, metadataPrefix='dcat')
-    except requests.HTTPError as e:
+    except requests.HTTPError:
         # might just be a concept DOI which don't show up in OAI. Try to
         # resolve it through the search API.
         r = requests.get(f'{MODEL_REPO}records/{_doi_to_zenodo_id(model_id)}')
@@ -173,7 +171,7 @@ def get_description(model_id: str,
         raise ValueError(f'{model_id} is not a valid DOI')
     try:
         record = sickle.GetRecord(identifier=oai_id, metadataPrefix='dcat')
-    except requests.HTTPError as e:
+    except requests.HTTPError:
         # might just be a concept DOI which don't show up in OAI. Try to
         # resolve it through the search API.
         r = requests.get(f'{MODEL_REPO}records/{_doi_to_zenodo_id(model_id)}')
@@ -198,7 +196,7 @@ def get_description(model_id: str,
             try:
                 repo_record = _build_v1_record(metadata, r.content.decode('utf-8'))
             except Exception as e:
-                logger.info(f'Invalid metadata for {doi}: {e}')
+                logger.info(f'Invalid metadata for {model_id}: {e}')
         if name == 'metadata.json':  # v0 model
             if version != 'v0' and repo_record:
                 break
@@ -210,7 +208,7 @@ def get_description(model_id: str,
             try:
                 repo_record = _build_v0_record(metadata, r)
             except Exception as e:
-                logger.info(f'Invalid metadata for {doi}: {e}')
+                logger.info(f'Invalid metadata for {model_id}: {e}')
 
     if not repo_record:
         raise ValueError(f"No metadata found for \'{model_id}\'")

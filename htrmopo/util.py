@@ -20,7 +20,7 @@ with open(resources.files('htrmopo').joinpath('iso15924.txt')) as fp:
     _iso15924 = {}
     for line in fp.readlines():
         try:
-            code, _, name, *_ =  line.split(';')
+            code, _, name, *_ = line.split(';')
             _iso15924[code] = name
         except Exception:
             continue
@@ -29,7 +29,7 @@ with open(resources.files('htrmopo').joinpath('iso639-3.txt')) as fp:
     _iso639_3 = {}
     for line in fp.readlines()[1:]:
         try:
-            code , name, *_ =  line.split('\t')
+            code, name, *_ = line.split('\t')
             _iso639_3[code] = name
         except Exception:
             continue
@@ -106,4 +106,3 @@ def make_printable(char: str) -> str:
         return '0x{:x}'.format(ord(char))
     else:
         return unicodedata.name(char)
-

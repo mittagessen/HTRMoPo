@@ -18,7 +18,6 @@ htrmopo.cli
 
 Command line driver for interacting with the model repository.
 """
-import os
 import logging
 
 import click
@@ -26,7 +25,7 @@ import click
 from rich import print
 from rich.tree import Tree
 from rich.table import Table
-from rich.console import group, Group
+from rich.console import Group
 from rich.traceback import install
 from rich.logging import RichHandler
 from rich.markdown import Markdown
@@ -55,7 +54,7 @@ def _render_creators(creators):
         c_text = creator['name']
         if (orcid := creator.get('orcid', None)) is not None:
             c_text += f' ({orcid})'
-        if (affiliation:= creator.get('affiliation', None)) is not None:
+        if (affiliation := creator.get('affiliation', None)) is not None:
             c_text += f' ({affiliation})'
         o.append(c_text)
     return o
@@ -181,7 +180,7 @@ def list_models(ctx, from_date):
         t = Tree(k)
         [t.add(x.doi) for x in records]
         table.add_row(t,
-                      Group(*['']+ [x.summary for x in records]),
+                      Group(*[''] + [x.summary for x in records]),
                       Group(*[''] + ['; '.join(x.model_type) for x in records]),
                       Group(*[''] + ['; '.join(x.keywords) for x in records]))
 

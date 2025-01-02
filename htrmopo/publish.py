@@ -15,7 +15,6 @@
 """
 Accessors to the v2 model repository on zenodo.
 """
-import os
 import yaml
 import json
 import logging
@@ -25,7 +24,6 @@ from typing import TYPE_CHECKING, Any, Callable
 from pathlib import Path
 from markdown import markdown
 from jsonschema import validate
-from jsonschema.exceptions import ValidationError
 
 from htrmopo.util import _yaml_regex, _v1_schema, _doi_to_zenodo_id
 
@@ -150,12 +148,16 @@ def update_model(model_id: str,
 
     # add link to training data to metadata
     if 'datasets' in mopo_metadata and mopo_metadata['datasets']:
-        data['metadata']['related_identifiers'] = [{'relation': 'isDerivedFrom', 'identifier': ds, 'resource_type': 'dataset'} for ds in mopo_metadata['datasets']]
+        data['metadata']['related_identifiers'] = [{'relation': 'isDerivedFrom',
+                                                    'identifier': ds,
+                                                    'resource_type': 'dataset'} for ds in mopo_metadata['datasets']]
 
     if 'base_model' in mopo_metadata and mopo_metadata['base_model']:
         if 'related_identifiers' not in data['metadata']:
             data['metadata']['related_identifiers'] = []
-        data['metadata']['related_identifiers'].extend([{'relation': 'isDerivedFrom', 'identifier': mid, 'resource_type': 'other'} for mid in mopo_metadata['base_model']])
+        data['metadata']['related_identifiers'].extend([{'relation': 'isDerivedFrom',
+                                                         'identifier': mid,
+                                                         'resource_type': 'other'} for mid in mopo_metadata['base_model']])
 
     r = requests.put(f'{MODEL_REPO}deposit/depositions/{new_recid}',
                      params={'access_token': access_token},
@@ -268,12 +270,16 @@ def publish_model(model: 'PathLike',
 
     # add link to training data to metadata
     if 'datasets' in mopo_metadata and mopo_metadata['datasets']:
-        data['metadata']['related_identifiers'] = [{'relation': 'isDerivedFrom', 'identifier': ds, 'resource_type': 'dataset'} for ds in mopo_metadata['datasets']]
+        data['metadata']['related_identifiers'] = [{'relation': 'isDerivedFrom',
+                                                    'identifier': ds,
+                                                    'resource_type': 'dataset'} for ds in mopo_metadata['datasets']]
 
     if 'base_model' in mopo_metadata and mopo_metadata['base_model']:
         if 'related_identifiers' not in data['metadata']:
             data['metadata']['related_identifiers'] = []
-        data['metadata']['related_identifiers'].extend([{'relation': 'isDerivedFrom', 'identifier': mid, 'resource_type': 'other'} for mid in mopo_metadata['base_model']])
+        data['metadata']['related_identifiers'].extend([{'relation': 'isDerivedFrom',
+                                                         'identifier': mid,
+                                                         'resource_type': 'other'} for mid in mopo_metadata['base_model']])
 
     r = requests.put(f'{MODEL_REPO}deposit/depositions/{deposition_id}',
                      params={'access_token': access_token},

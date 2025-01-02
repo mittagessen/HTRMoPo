@@ -15,13 +15,14 @@
 """
 DCAT record class for Sickle
 """
-import re
-
-from collections import defaultdict
 from sickle.models import Header, Record
 
-from dataclasses import asdict, dataclass, field
-from typing import TypedDict, Optional, Dict, List
+from dataclasses import dataclass, field
+from typing import TypedDict, Optional, Dict, List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import datetime.datetime
+
 
 def dcat_to_dict(tree):
     """Converts a DCAT XML tree to a dictionary.
@@ -40,7 +41,7 @@ def dcat_to_dict(tree):
     for creator in tree.findall('./{*}RDF/{*}Description/{*}creator/{*}Description'):
         creators.append({'name': c.text if (c := creator.find('./{*}name')) is not None else '',
                          'orcid': o[0] if len(o := [v for k, v in creator.attrib.items() if k.endswith('about')]) else None,
-                         'affiliation': a.text if (a:= creator.find('./{*}memberOf//{*}name')) is not None else ''})
+                         'affiliation': a.text if (a := creator.find('./{*}memberOf//{*}name')) is not None else ''})
     if (concept := tree.find('./{*}RDF/{*}Description/{*}isVersionOf/{*}Description/{*}identifier')) is not None:
         concept = concept.text
     return {'doi': d.text if (d := tree.find('./{*}RDF/{*}Description/{*}identifier')) is not None else None,
@@ -144,4 +145,3 @@ class v0RepositoryRecord:
     model_type: List[str] = field(default_factory=lambda: ['recognition'])
     keywords: Optional[List[str]] = None
     version: str = 'v0'
-

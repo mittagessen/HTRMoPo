@@ -38,6 +38,15 @@
              "$id": "#/properties/authors/items/properties/orcid",
              "type": "string",
              "title": "A single author's ORCID"
+           },
+           "roles": {
+             "$id": "#/properties/authors/items/properties/roles",
+             "type": "array",
+             "title": "An author's role in creating the model",
+             "items": {
+               "$id": "#/properties/authors/items/properties/roles/items",
+               "type": "string"
+             }
            }
          }
        }
@@ -157,6 +166,11 @@
          "$id": "#/properties/base_model/items",
          "type": "string"
        }
+     },
+     "citation": {
+       "$id": "#/properties/citation",
+       "type": "string",
+       "title": "Citation of any publication(s) associated with the model."
      }
   }
 }

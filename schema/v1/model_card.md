@@ -5,7 +5,9 @@ summary: {summary_0}  # A one-line summary of the model
 authors:
   - name: {name_0}
     affiliation: {affiliation_0}  # Affiliation is optional.
+    role: {role_0}  # Roles are optional
   - name: {name_1}
+    role: {role_1}
 license: {license_0}  # Example: Apache-2.0
 license_name: {license_name_0}  # When license == 'other-*' give your license name here
 license_link: {license_link_0}  # When license == 'other-*' give the location of the full license text here.
@@ -31,6 +33,7 @@ datasets:
 - {dataset_0}  # Example: https://github.com/OpenITI/arabic_print_data.git
 base_model:  # base model this model has been fine-tuned on. Might be more than one. Should be PIDs/URLs
 - {base_model_0}  # Example: https://github.com/mittagessen/bytellama
+citation: {citation_0}  # Example: https://inria.hal.science/hal-04591043
 ---
 # {model_name}
 

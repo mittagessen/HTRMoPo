@@ -35,7 +35,7 @@ from typing import TYPE_CHECKING, Any, Callable, Optional, Literal, Union, Dict
 
 
 from htrmopo.record import DCATRecord, v0RepositoryRecord, v1RepositoryRecord
-from htrmopo.util import _yaml_regex, _v1_schema, _v0_schema, _doi_to_oai_id
+from htrmopo.util import _yaml_regex, _v1_schema, _v0_schema, _doi_to_oai_id, _doi_to_zenodo_id
 
 if TYPE_CHECKING:
     from os import PathLike
@@ -108,6 +108,20 @@ def get_model(model_id: str,
     Returns:
         The output path under which the model files have been placed.
     """
+    logger.info(f'Saving model {model_id} to {path}')
+    if (oai_id := _doi_to_oai_id(model_id)) is None:
+        raise ValueError(f'{model_id} is not a valid DOI')
+    try:
+        record = sickle.GetRecord(identifier=oai_id, metadataPrefix='dcat')
+    except requests.HTTPError as e:
+        # might just be a concept DOI which don't show up in OAI. Try to
+        # resolve it through the search API.
+        r = requests.get(f'{MODEL_REPO}records/{_doi_to_zenodo_id(model_id)}')
+        r.raise_for_status()
+        model_id = r.json()['doi']
+        real_oai_id = _doi_to_oai_id(model_id)
+        record = sickle.GetRecord(identifier=real_oai_id, metadataPrefix='dcat')
+
     if path is not None:
         path = Path(path).resolve()
     else:
@@ -121,13 +135,6 @@ def get_model(model_id: str,
 
     path.mkdir(parents=True, exist_ok=True)
 
-    logger.info(f'Saving model {model_id} to {path}')
-    if (oai_id := _doi_to_oai_id(model_id)) is None:
-        raise ValueError(f'{model_id} is not a valid DOI')
-    try:
-        record = sickle.GetRecord(identifier=oai_id, metadataPrefix='dcat')
-    except Exception:
-        raise ValuError(f'Invalid DOI {model_id}')
     callback(0, 0)
     metadata = record.metadata
     model_size = sum([file['size'] for file in metadata['distribution']])
@@ -166,8 +173,13 @@ def get_description(model_id: str,
         raise ValueError(f'{model_id} is not a valid DOI')
     try:
         record = sickle.GetRecord(identifier=oai_id, metadataPrefix='dcat')
-    except Exception:
-        raise ValueError(f'DOI {model_id} not in repository.')
+    except requests.HTTPError as e:
+        # might just be a concept DOI which don't show up in OAI. Try to
+        # resolve it through the search API.
+        r = requests.get(f'{MODEL_REPO}records/{_doi_to_zenodo_id(model_id)}')
+        r.raise_for_status()
+        real_oai_id = _doi_to_oai_id(r.json()['doi'])
+        record = sickle.GetRecord(identifier=real_oai_id, metadataPrefix='dcat')
 
     callback()
     repo_record = None

@@ -36,7 +36,7 @@ __all__ = ['update_model', 'publish_model']
 
 logger = logging.getLogger(__name__)
 
-MODEL_REPO = 'https://zenodo.org/api/'
+MODEL_REPO = 'https://sandbox.zenodo.org/api/'
 
 
 def update_model(model_id: str,
@@ -64,7 +64,7 @@ def update_model(model_id: str,
     if not model.exists():
         raise ValueError('Model path {model} does not exist.')
     # find all files for the deposition
-    model_size = 3
+    model_size = 4
     if model.is_dir():
         model_files = []
         for file in model.iterdir():
@@ -86,8 +86,18 @@ def update_model(model_id: str,
     mopo_metadata = yaml.safe_load(header)
     validate(mopo_metadata, _v1_schema)
 
-    # create a new draft version of an existing deposition.
+    # we first fetch the metadata record as the DOI argument might refer to a
+    # concept ID which needs to be resolved.
     recid = _doi_to_zenodo_id(model_id)
+    r = requests.get(f'{MODEL_REPO}records/{recid}')
+    r.raise_for_status()
+    new_recid = _doi_to_zenodo_id(r.json()['doi'])
+    if recid != new_recid:
+        logger.info(f'Resolved {recid} to {new_recid}.')
+        recid = new_recid
+    callback(model_size, 1)
+
+    # create a new draft version of an existing deposition.
     r = requests.post(f'{MODEL_REPO}records/{recid}/versions', params={'access_token': access_token})
     r.raise_for_status()
     callback(model_size, 1)

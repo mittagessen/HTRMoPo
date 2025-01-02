@@ -64,7 +64,7 @@ def update_model(model_id: str,
     if not model.exists():
         raise ValueError('Model path {model} does not exist.')
     # find all files for the deposition
-    model_size = len(model_card.encode('utf-8'))
+    model_size = 3
     if model.is_dir():
         model_files = []
         for file in model.iterdir():
@@ -102,6 +102,7 @@ def update_model(model_id: str,
     mopo_metadata['id'] = depo['metadata']['prereserve_doi']['doi']
     header = yaml.dump(mopo_metadata)
     _metadata = f'---\n{header}---\n{content}'.encode('utf-8')
+    model_size += len(_metadata)
 
     # push metadata file
     r = requests.put(f'{bucket_url}/README.md',
@@ -163,7 +164,7 @@ def update_model(model_id: str,
 def publish_model(model: 'PathLike',
                   model_card: str,
                   access_token: str,
-                  callback: Callable[[int, int], Any] = lambda total, advance: None,
+                  callback: Callable[[int, int], Any] = lambda total, completed: None,
                   private: bool = False) -> str:
     """
     Publishes a model to the repository.
@@ -181,7 +182,7 @@ def publish_model(model: 'PathLike',
     if not model.exists():
         raise ValueError('Model path {model} does not exist.')
     # find all files for the deposition
-    model_size = len(model_card.encode('utf-8'))
+    model_size = 3
     if model.is_dir():
         model_files = []
         for file in model.iterdir():
@@ -210,7 +211,6 @@ def publish_model(model: 'PathLike',
                       json={},
                       headers=headers)
     r.raise_for_status()
-    callback(model_size, 1)
     depo = r.json()
     deposition_id = depo['id']
     bucket_url = depo['links']['bucket']
@@ -219,6 +219,8 @@ def publish_model(model: 'PathLike',
     mopo_metadata['id'] = depo['metadata']['prereserve_doi']['doi']
     header = yaml.dump(mopo_metadata)
     _metadata = f'---\n{header}---\n{content}'.encode('utf-8')
+    model_size += len(_metadata)
+    callback(model_size, 1)
 
     # push metadata file
     r = requests.put(f'{bucket_url}/README.md',

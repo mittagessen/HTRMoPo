@@ -232,17 +232,15 @@ def publish(ctx, metadata, doi, access_token, private, model):
 
     pub_fn = publish_model
 
-    with open(metadata, 'r') as fp:
-        markdown = fp.read()
     with Progress() as progress:
         upload_task = progress.add_task('Uploading', total=0)
         kwargs = {'model': model,
-                  'model_card': metadata,
+                  'model_card': metadata.read(),
                   'access_token': access_token,
                   'callback': lambda total, advance: progress.update(upload_task, total=total, advance=advance),
                   'private': private}
         if doi:
             pub_fn = update_model
             kwargs['model_id'] = doi
-        pub_fn(**kwargs)
+        oid = pub_fn(**kwargs)
     print(f'model PID: {oid}')

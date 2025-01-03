@@ -46,9 +46,20 @@ Using a research data infrastructure like Zenodo assures long-term
 accessibility of the deposited models while also enabling good scientific
 practices like reproducibility and crediting contributions.
 
-## Deposits
+## Deposits and Identifiers
 
-Each model 
+Each model in the repository consists of the model card with metadata and one
+or more model files and is identified by two persistent and unique DOIs. One of
+the DOIs refers to the deposit, which means a single model, itself while the
+second one is called the [concept DOI](https://zenodo.org/help/versioning). An
+example is [10.5281/zenodo.7051646](https://zenodo.org/records/7051646) with
+concept DOI [10.5281/zenodo.7051645](https://doi.org/10.5281/zenodo.7051645).
+When a new version of a model is updated to the repository a new DOI is
+created, for example
+[10.5281/zenodo.14585602](https://zenodo.org/records/14585602) for the above
+model but the concept DOI remains the same, aggregating all versions of a model
+under a single identifier. The concept DOI therefore aggregates all versions of
+the model and in addition will always link to the latest version of it.
 
 ## Python Library
 

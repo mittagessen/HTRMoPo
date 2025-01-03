@@ -80,7 +80,6 @@ def update_model(model_id: str,
     # validate model card
     header, content = _yaml_regex.match(model_card).groups()
     mopo_metadata = yaml.safe_load(header)
-    validate(mopo_metadata, _v1_schema)
 
     # we first fetch the metadata record as the DOI argument might refer to a
     # concept ID which needs to be resolved.
@@ -106,7 +105,11 @@ def update_model(model_id: str,
 
     # finalize metadata record
     mopo_metadata['id'] = depo['metadata']['prereserve_doi']['doi']
+    # we need to validate here to as the data structure might have an empty ID before
+    validate(mopo_metadata, _v1_schema)
+
     header = yaml.dump(mopo_metadata)
+
     _metadata = f'---\n{header}---\n{content}'.encode('utf-8')
     model_size += len(_metadata)
 
@@ -212,7 +215,6 @@ def publish_model(model: 'PathLike',
     # validate model card
     header, content = _yaml_regex.match(model_card).groups()
     mopo_metadata = yaml.safe_load(header)
-    validate(mopo_metadata, _v1_schema)
 
     # create new deposition
     headers = {"Content-Type": "application/json"}
@@ -227,6 +229,9 @@ def publish_model(model: 'PathLike',
 
     # finalize metadata record
     mopo_metadata['id'] = depo['metadata']['prereserve_doi']['doi']
+    # we need to validate here to as the data structure might have an empty ID before
+    validate(mopo_metadata, _v1_schema)
+
     header = yaml.dump(mopo_metadata)
     _metadata = f'---\n{header}---\n{content}'.encode('utf-8')
     model_size += len(_metadata)

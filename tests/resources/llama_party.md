@@ -1,6 +1,6 @@
 ---
 # Example metadata to be added to a model card.
-id: bar  # Example: https://doi.org/10.5281/zenodo.14399779
+id: {id_0}  # Example: https://doi.org/10.5281/zenodo.14399779
 summary: Pretrained multilingual Party model 
 authors:
   - name: Benjamin Kiessling

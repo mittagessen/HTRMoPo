@@ -1,5 +1,7 @@
 # HTRMoPo
 
+![tests](https://github.com/mittagessen/htrmopo/actions/workflows/test.yml/badge.svg)
+
 HTRMoPo is a schema and an implementation for an automatic text recognition
 model repository hosted on the [Zenodo](https://zenodo.org) research data
 infrastructure. It is designed to enable discoverability of models across a

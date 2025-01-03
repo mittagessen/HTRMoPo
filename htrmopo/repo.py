@@ -33,7 +33,7 @@ from typing import TYPE_CHECKING, Any, Callable, Optional, Literal, Union, Dict
 
 
 from htrmopo.record import DCATRecord, v0RepositoryRecord, v1RepositoryRecord
-from htrmopo.util import _yaml_regex, _v1_schema, _v0_schema, _doi_to_oai_id, _doi_to_zenodo_id
+from htrmopo.util import _yaml_regex, _v1_schema, _v0_schema, _doi_to_oai_id, _doi_to_zenodo_id, get_repo_url, get_oai_url
 
 if TYPE_CHECKING:
     from os import PathLike
@@ -42,10 +42,7 @@ __all__ = ['get_model', 'get_description', 'get_listing']
 
 logger = logging.getLogger(__name__)
 
-MODEL_REPO = 'https://zenodo.org/api/'
-OAI_URL = 'https://zenodo.org/oai2d'
-
-sickle = Sickle(OAI_URL)
+sickle = Sickle(get_oai_url())
 sickle.class_mapping['ListRecords'] = DCATRecord
 sickle.class_mapping['GetRecord'] = DCATRecord
 
@@ -114,7 +111,7 @@ def get_model(model_id: str,
     except requests.HTTPError:
         # might just be a concept DOI which don't show up in OAI. Try to
         # resolve it through the search API.
-        r = requests.get(f'{MODEL_REPO}records/{_doi_to_zenodo_id(model_id)}')
+        r = requests.get(f'{get_repo_url()}records/{_doi_to_zenodo_id(model_id)}')
         r.raise_for_status()
         model_id = r.json()['doi']
         real_oai_id = _doi_to_oai_id(model_id)
@@ -174,7 +171,7 @@ def get_description(model_id: str,
     except requests.HTTPError:
         # might just be a concept DOI which don't show up in OAI. Try to
         # resolve it through the search API.
-        r = requests.get(f'{MODEL_REPO}records/{_doi_to_zenodo_id(model_id)}')
+        r = requests.get(f'{get_repo_url()}records/{_doi_to_zenodo_id(model_id)}')
         r.raise_for_status()
         real_oai_id = _doi_to_oai_id(r.json()['doi'])
         record = sickle.GetRecord(identifier=real_oai_id, metadataPrefix='dcat')

@@ -1,3 +1,4 @@
+import os
 import re
 import json
 import unicodedata
@@ -34,12 +35,19 @@ with open(resources.files('htrmopo').joinpath('iso639-3.txt')) as fp:
         except Exception:
             continue
 
+def get_oai_url() -> str:
+    return os.getenv('MODEL_REPO_OAI_URL', 'https://zenodo.org/oai2d')
 
-def iso639_3_to_name(script):
+
+def get_repo_url() -> str:
+    return os.getenv('MODEL_REPO_URL', 'https://zenodo.org/api/')
+
+
+def iso639_3_to_name(script: str) -> str:
     return _iso639_3[script]
 
 
-def iso15924_to_name(script):
+def iso15924_to_name(script: str) -> str:
     return _iso15924[script]
 
 

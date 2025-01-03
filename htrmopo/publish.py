@@ -25,7 +25,7 @@ from pathlib import Path
 from markdown import markdown
 from jsonschema import validate
 
-from htrmopo.util import _yaml_regex, _v1_schema, _doi_to_zenodo_id
+from htrmopo.util import _yaml_regex, _v1_schema, _doi_to_zenodo_id, get_repo_url
 
 if TYPE_CHECKING:
     from os import PathLike
@@ -33,8 +33,6 @@ if TYPE_CHECKING:
 __all__ = ['update_model', 'publish_model']
 
 logger = logging.getLogger(__name__)
-
-MODEL_REPO = 'https://sandbox.zenodo.org/api/'
 
 
 def update_model(model_id: str,
@@ -87,7 +85,7 @@ def update_model(model_id: str,
     # we first fetch the metadata record as the DOI argument might refer to a
     # concept ID which needs to be resolved.
     recid = _doi_to_zenodo_id(model_id)
-    r = requests.get(f'{MODEL_REPO}records/{recid}')
+    r = requests.get(f'{get_repo_url()}records/{recid}')
     r.raise_for_status()
     new_recid = _doi_to_zenodo_id(r.json()['doi'])
     if recid != new_recid:
@@ -96,11 +94,11 @@ def update_model(model_id: str,
     callback(model_size, 1)
 
     # create a new draft version of an existing deposition.
-    r = requests.post(f'{MODEL_REPO}records/{recid}/versions', params={'access_token': access_token})
+    r = requests.post(f'{get_repo_url()}records/{recid}/versions', params={'access_token': access_token})
     r.raise_for_status()
     callback(model_size, 1)
     new_recid = r.json()['id']
-    r = requests.get(f'{MODEL_REPO}deposit/depositions/{new_recid}', params={'access_token': access_token})
+    r = requests.get(f'{get_repo_url()}deposit/depositions/{new_recid}', params={'access_token': access_token})
     r.raise_for_status()
     callback(model_size, 1)
     depo = r.json()
@@ -159,14 +157,14 @@ def update_model(model_id: str,
                                                          'identifier': mid,
                                                          'resource_type': 'other'} for mid in mopo_metadata['base_model']])
 
-    r = requests.put(f'{MODEL_REPO}deposit/depositions/{new_recid}',
+    r = requests.put(f'{get_repo_url()}deposit/depositions/{new_recid}',
                      params={'access_token': access_token},
                      data=json.dumps(data),
                      headers={"Content-Type": "application/json"})
 
     r.raise_for_status()
     callback(model_size, 1)
-    r = requests.post(f'{MODEL_REPO}deposit/depositions/{new_recid}/actions/publish',
+    r = requests.post(f'{get_repo_url()}deposit/depositions/{new_recid}/actions/publish',
                       params={'access_token': access_token})
     r.raise_for_status()
     callback(model_size, 1)
@@ -218,7 +216,7 @@ def publish_model(model: 'PathLike',
 
     # create new deposition
     headers = {"Content-Type": "application/json"}
-    r = requests.post(f'{MODEL_REPO}deposit/depositions',
+    r = requests.post(f'{get_repo_url()}deposit/depositions',
                       params={'access_token': access_token},
                       json={},
                       headers=headers)
@@ -281,13 +279,13 @@ def publish_model(model: 'PathLike',
                                                          'identifier': mid,
                                                          'resource_type': 'other'} for mid in mopo_metadata['base_model']])
 
-    r = requests.put(f'{MODEL_REPO}deposit/depositions/{deposition_id}',
+    r = requests.put(f'{get_repo_url()}deposit/depositions/{deposition_id}',
                      params={'access_token': access_token},
                      data=json.dumps(data),
                      headers=headers)
     r.raise_for_status()
     callback(model_size, 1)
-    r = requests.post(f'{MODEL_REPO}deposit/depositions/{deposition_id}/actions/publish',
+    r = requests.post(f'{get_repo_url()}deposit/depositions/{deposition_id}/actions/publish',
                       params={'access_token': access_token})
     r.raise_for_status()
     callback(model_size, 1)

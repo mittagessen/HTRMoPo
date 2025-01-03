@@ -171,3 +171,19 @@ option giving the DOI of an existing model deposit in the repository:
     ~> htrmopo publish -d 10.5072/zenodo.146502 -i model_card.md -a ${ACCESS_TOKEN} model_dir
     Uploading ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 0:00:00
     model PID: 10.5072/zenodo.146627
+
+#### Configuration
+
+The tool is intended to work out of the box but sometimes it can be useful for
+testing purposes to point it to another instance of
+[InvenioDRM](https://inveniosoftware.org/products/rdm/) such as the [Zenodo
+sandbox](https://sandbox.zenodo.org/) in order not to pollute the main
+repository with spurious deposits.
+
+You can set the OAI-PMH API endpoint (required for querying) and InvenioDRM
+endpoint (needed for querying and publishing) with the `MODEL_REPO_OAI_URL` and
+`MODEL_REPO_URL` environments, for example:
+
+    MODEL_REPO_URL=https://sandbox.zenodo.org/api/ htrmopo publish -i model_card.md -a ....
+
+will upload a model to the sandbox instance of Zenodo.

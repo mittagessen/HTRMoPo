@@ -55,26 +55,3 @@ jobs:
         python -m build --sdist --wheel --outdir dist/ .
     - name: Publish a Python distribution to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
-    - name: Upload PyPI artifacts to GH storage
-      uses: actions/upload-artifact@v3
-      with:
-        name: pypi_packages
-        path: dist/*
-
-  autodraft-gh-release:
-    name: Create github release
-    needs: build-n-publish-pypi
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: pypi_packages
-          path: pypi
-      - uses: "marvinpinto/action-automatic-releases@latest"
-        with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          prerelease: false
-          draft: true
-          files: |
-            pypi/*

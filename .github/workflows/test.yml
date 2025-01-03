@@ -1,0 +1,81 @@
+name: Lint, test, build, and publish
+
+on:
+  push:
+
+jobs:
+  lint_and_test:
+    name: Runs the linter and tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.9, '3.10', '3.11', '3.12', '3.13']
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies and htrmopo
+        run: |
+          python -m pip install --upgrade pip
+          pip install .[test] flake8
+      - name: Lint with flake8
+        run: |
+          # stop the build if there are Python syntax errors or undefined names
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      - name: Run tests
+        env:
+          ZENODO_ACCESS_TOKEN: ${{ secrets.zenodo_sandbox_token }}
+        run: |
+          pytest
+
+  build-n-publish-pypi:
+    name: Build and publish Python 🐍 distributions 📦 to PyPI and TestPyPI
+    needs: lint_and_test
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.13
+    - name: Build a binary wheel and a source tarball
+      run: |
+        python -m pip install build --user
+        python -m build --sdist --wheel --outdir dist/ .
+    - name: Publish a Python distribution to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        user: __token__
+        password: ${{ secrets.PYPI_API_TOKEN }}
+    - name: Upload PyPI artifacts to GH storage
+      uses: actions/upload-artifact@v3
+      with:
+        name: pypi_packages
+        path: dist/*
+
+  autodraft-gh-release:
+    name: Create github release
+    needs: build-n-publish-pypi
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: pypi_packages
+          path: pypi
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          draft: true
+          files: |
+            pypi/*

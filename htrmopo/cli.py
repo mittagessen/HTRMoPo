@@ -142,6 +142,7 @@ def show(ctx, metadata_version, model_id):
         table.add_row('software', desc.software_name)
         table.add_row('software_hints', Group(*desc.software_hints) if desc.software_hints else '')
         table.add_row('license', desc.license)
+        table.add_row('citation', desc.citation if desc.citation else '')
         table.add_row('creators', Group(*_render_creators(desc.creators)))
         table.add_row('description', Markdown(desc.description))
 

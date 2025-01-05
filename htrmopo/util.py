@@ -35,6 +35,9 @@ with open(resources.files('htrmopo').joinpath('iso639-3.txt')) as fp:
         except Exception:
             continue
 
+with open(resources.files('htrmopo').joinpath('licenses.json')) as fp:
+    _licenses = json.load(fp)
+
 
 def get_oai_url() -> str:
     return os.getenv('MODEL_REPO_OAI_URL', 'https://zenodo.org/oai2d')

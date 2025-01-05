@@ -62,33 +62,38 @@
      "license": {
        "$id": "#/properties/license",
        "type": "string",
-       "title": "License of the model"
+       "title": "License of the model",
+       "format": "okfn_license",
+       "controlled_vocabulary": "https://licenses.opendefinition.org/licenses/groups/all.json"
      },
      "script": {
-       "$id": "#/properties/script",
-       "type": "array",
-       "uniqueItems": true,
-       "minItems": 1,
-       "title": "ISO 15924 scripts recognized by the model",
-       "items": {
-         "$id": "#/properties/script/items",
-         "type": "string"
-      }
+        "$id": "#/properties/script",
+        "type": "array",
+        "uniqueItems": true,
+        "minItems": 1,
+        "title": "ISO 15924 codes for scripts the model has been trained on.",
+        "controlled_vocabulary": "https://unicode.org/iso15924/iso15924.txt",
+        "items": {
+          "$id": "#/properties/script/items",
+          "type": "string",
+          "format": "iso-15924",
+          "pattern": "^[A-Z][a-z]{3}"
+        }
+     },     
+     "name": {
+       "$id": "#/properties/name",
+       "type": "string",
+       "title": "Filename of the model"
      },
-    "name": {
-      "$id": "#/properties/name",
-      "type": "string",
-      "title": "Filename of the model"
-    },
-    "graphemes": {
-      "$id": "#/properties/graphemes",
-      "type": "array",
-      "title": "Code points recognizable by the model",
-      "minItems": 1,
-      "items": {
-        "$id": "#/properties/graphemes/items",
-        "type": "string"
-      }
-    }
+     "graphemes": {
+       "$id": "#/properties/graphemes",
+       "type": "array",
+       "title": "Code points recognizable by the model",
+       "minItems": 1,
+       "items": {
+         "$id": "#/properties/graphemes/items",
+         "type": "string"
+       }
+     }
   }
 }

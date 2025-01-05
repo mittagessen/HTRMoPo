@@ -37,7 +37,8 @@
            "orcid": {
              "$id": "#/properties/authors/items/properties/orcid",
              "type": "string",
-             "title": "A single author's ORCID"
+             "title": "A single author's ORCID",
+	     "format": "uri"
            }
          }
        }
@@ -56,6 +57,7 @@
        "$id": "#/properties/license",
        "type": "string",
        "title": "License of the model. Valid values are in https://github.com/okfn/licenses.",
+       "format": "okfn-license",
        "controlled_vocabulary": "https://licenses.opendefinition.org/licenses/groups/all.json"
      },
      "license_name": {
@@ -94,6 +96,7 @@
        "items": {
          "$id": "#/properties/language/items",
          "type": "string",
+	 "format": "iso-639-3",
 	 "pattern": "^[a-z]{3}"
        }
      },
@@ -107,6 +110,7 @@
        "items": {
          "$id": "#/properties/script/items",
          "type": "string",
+	 "format": "iso-15924",
 	 "pattern": "^[A-Z][a-z]{3}"
        }
     },

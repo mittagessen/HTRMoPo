@@ -61,7 +61,9 @@ def _render_creators(creators):
 
 
 def _render_metrics(metrics):
-    return [f'{k}: {v:.2f}' for k, v in metrics.items()]
+    if metrics:
+        return [f'{k}: {v:.2f}' for k, v in metrics.items()]
+    return ''
 
 
 @click.group(chain=False)
@@ -133,13 +135,13 @@ def show(ctx, metadata_version, model_id):
         table.add_row('model type', Group(*desc.model_type))
         table.add_row('language', Group(*[iso639_3_to_name(x) for x in desc.language]))
         table.add_row('script', Group(*[iso15924_to_name(x) for x in desc.script]))
-        table.add_row('keywords', Group(*desc.keywords))
-        table.add_row('datasets', Group(*desc.datasets))
-        table.add_row('metrics', Group(*_render_metrics(desc.metrics)))
-        table.add_row('base model', Group(*desc.base_model))
+        table.add_row('keywords', Group(*desc.keywords) if desc.keywords else '')
+        table.add_row('datasets', Group(*desc.datasets) if desc.datasets else '')
+        table.add_row('metrics', Group(*_render_metrics(desc.metrics)) if desc.metrics else '')
+        table.add_row('base model', Group(*desc.base_model) if desc.base_model else '')
         table.add_row('software', desc.software_name)
-        table.add_row('software_hints', Group(*desc.software_hints))
-        table.add_row('license', license_id_to_name(desc.license))
+        table.add_row('software_hints', Group(*desc.software_hints) if desc.software_hints else '')
+        table.add_row('license', desc.license)
         table.add_row('creators', Group(*_render_creators(desc.creators)))
         table.add_row('description', Markdown(desc.description))
 

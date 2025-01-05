@@ -123,7 +123,7 @@ class v1RepositoryRecord:
     datasets: Optional[List[str]] = None
     base_model: Optional[List[str]] = None
     keywords: Optional[List[str]] = None
-    publication: Optional[str] = None
+    citation: Optional[str] = None
     version: str = 'v1'
 
 

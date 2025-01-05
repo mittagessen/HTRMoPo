@@ -139,7 +139,7 @@ def show(ctx, metadata_version, model_id):
         table.add_row('base model', Group(*desc.base_model))
         table.add_row('software', desc.software_name)
         table.add_row('software_hints', Group(*desc.software_hints))
-        table.add_row('license', desc.license)
+        table.add_row('license', license_id_to_name(desc.license))
         table.add_row('creators', Group(*_render_creators(desc.creators)))
         table.add_row('description', Markdown(desc.description))
 

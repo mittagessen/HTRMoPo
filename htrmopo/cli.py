@@ -33,7 +33,7 @@ from rich.progress import Progress
 
 from collections import defaultdict
 
-from htrmopo.util import make_printable, is_printable, iso15924_to_name, iso639_3_to_name
+from htrmopo.util import make_printable, is_printable, iso15924_to_name, iso639_3_to_name, license_id_to_name
 
 logging.captureWarnings(True)
 logger = logging.getLogger('htrmopo')
@@ -120,7 +120,7 @@ def show(ctx, metadata_version, model_id):
         table.add_row('alphabet', Group(' '.join(chars), ', '.join(combining)))
         table.add_row('keywords', Group(*desc.keywords))
         table.add_row('metrics', Group(*_render_metrics(desc.metrics)))
-        table.add_row('license', desc.license)
+        table.add_row('license', license_id_to_name(desc.license))
         table.add_row('creators', Group(*_render_creators(desc.creators)))
         table.add_row('description', desc.description)
     elif desc.version == 'v1':

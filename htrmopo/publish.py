@@ -20,12 +20,13 @@ import json
 import logging
 import requests
 
-from typing import TYPE_CHECKING, Any, Callable
 from pathlib import Path
 from markdown import markdown
 from jsonschema import validate
+from typing import TYPE_CHECKING, Any, Callable
 
-from htrmopo.util import _yaml_regex, _v1_schema, _doi_to_zenodo_id, get_repo_url
+from htrmopo.util import (_yaml_regex, _v1_schema, _doi_to_zenodo_id,
+                          get_repo_url, format_checker)
 
 if TYPE_CHECKING:
     from os import PathLike
@@ -106,7 +107,7 @@ def update_model(model_id: str,
     # finalize metadata record
     mopo_metadata['id'] = depo['metadata']['prereserve_doi']['doi']
     # we need to validate here to as the data structure might have an empty ID before
-    validate(mopo_metadata, _v1_schema)
+    validate(mopo_metadata, _v1_schema, format_checker=format_checker)
 
     header = yaml.dump(mopo_metadata)
 
@@ -230,9 +231,10 @@ def publish_model(model: 'PathLike',
     # finalize metadata record
     mopo_metadata['id'] = depo['metadata']['prereserve_doi']['doi']
     # we need to validate here to as the data structure might have an empty ID before
-    validate(mopo_metadata, _v1_schema)
+    validate(mopo_metadata, _v1_schema, format_checker=format_checker)
 
     header = yaml.dump(mopo_metadata)
+
     _metadata = f'---\n{header}---\n{content}'.encode('utf-8')
     model_size += len(_metadata)
     callback(model_size, 1)

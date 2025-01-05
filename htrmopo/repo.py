@@ -33,7 +33,9 @@ from typing import TYPE_CHECKING, Any, Callable, Optional, Literal, Union, Dict
 
 
 from htrmopo.record import DCATRecord, v0RepositoryRecord, v1RepositoryRecord
-from htrmopo.util import _yaml_regex, _v1_schema, _v0_schema, _doi_to_oai_id, _doi_to_zenodo_id, get_repo_url, get_oai_url
+from htrmopo.util import (_yaml_regex, _v1_schema, _v0_schema, _doi_to_oai_id,
+                          _doi_to_zenodo_id, get_repo_url, get_oai_url,
+                          format_checker)
 
 if TYPE_CHECKING:
     from os import PathLike
@@ -52,7 +54,7 @@ def _build_v0_record(metadata, request):
         json_metadata = request.json()
     except Exception:
         raise Exception(f'Metadata for {metadata["doi"]} not in JSON format')
-    validate(json_metadata, _v0_schema)
+    validate(json_metadata, _v0_schema, format_checker=format_checker)
     metadata.update(json_metadata)
     metadata['creators'].extend(metadata['authors'])
     metadata['doi'] = urlsplit(metadata['doi']).path[1:]
@@ -69,7 +71,7 @@ def _build_v1_record(metadata, model_card):
         yaml_metadata = yaml.safe_load(header)
     except Exception:
         raise Exception(f'Metadata for {metadata["doi"]} not in YAML format')
-    validate(yaml_metadata, _v1_schema)
+    validate(yaml_metadata, _v1_schema, format_checker=format_checker)
     metadata.update(yaml_metadata)
     if metadata['license'].startswith('other'):
         metadata['license'] = metadata['license_name']

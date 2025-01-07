@@ -23,7 +23,7 @@ import requests
 from pathlib import Path
 from markdown import markdown
 from jsonschema import validate
-from typing import TYPE_CHECKING, Any, Callable
+from typing import TYPE_CHECKING, Any, Callable, Union
 
 from htrmopo.util import (_yaml_regex, _v1_schema, _doi_to_zenodo_id,
                           get_repo_url, format_checker)
@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 
 def update_model(model_id: str,
-                 model: 'PathLike',
+                 model: Union[str, 'PathLike'],
                  model_card: str,
                  access_token: str,
                  callback: Callable[[int, int], Any] = lambda total, advance: None,
@@ -175,7 +175,7 @@ def update_model(model_id: str,
     return r.json()['doi']
 
 
-def publish_model(model: 'PathLike',
+def publish_model(model: Union[str, 'PathLike'],
                   model_card: str,
                   access_token: str,
                   callback: Callable[[int, int], Any] = lambda total, completed: None,

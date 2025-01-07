@@ -88,7 +88,7 @@ def _build_v1_record(metadata, model_card):
 
 
 def get_model(model_id: str,
-              path: Optional['PathLike'] = None,
+              path: Optional[Union[str, 'PathLike']] = None,
               callback: Callable[[int, int], Any] = lambda total, advance: None,
               abort_if_exists: bool = False) -> 'PathLike':
     """

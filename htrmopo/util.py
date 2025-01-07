@@ -8,7 +8,7 @@ from jsonschema import FormatChecker
 
 
 ###############################################################################
-###  regex for YAML frontmatter extraction in Markdown files 
+# regex for YAML frontmatter extraction in Markdown files
 ###############################################################################
 
 _yaml_delim = r'(?:---|\+\+\+)'
@@ -18,7 +18,7 @@ _re_pattern = r'^\s*' + _yaml_delim + _yaml + _yaml_delim + _content
 _yaml_regex = re.compile(_re_pattern, re.S | re.M)
 
 ###############################################################################
-###  Schemas
+# Schemas
 ###############################################################################
 
 
@@ -29,7 +29,7 @@ with open(resources.files('htrmopo').joinpath('v0.metadata.schema.json')) as fp:
     _v0_schema = json.load(fp)
 
 ###############################################################################
-### Controlled vocabularies 
+# Controlled vocabularies
 ###############################################################################
 
 with open(resources.files('htrmopo').joinpath('iso15924.txt')) as fp:
@@ -56,6 +56,7 @@ with open(resources.files('htrmopo').joinpath('licenses.json')) as fp:
 
 format_checker = FormatChecker()
 
+
 @format_checker.checks('okfn-license')
 def checks_license(instance: object) -> bool:
     if not isinstance(instance, str):
@@ -78,7 +79,7 @@ def checks_iso_15924(instance: object) -> bool:
 
 
 ###############################################################################
-### Global getters 
+# Global getters
 ###############################################################################
 
 
@@ -91,7 +92,7 @@ def get_repo_url() -> str:
 
 
 ###############################################################################
-### Mapping between vocabulary IDs and natural language strings 
+# Mapping between vocabulary IDs and natural language strings
 ###############################################################################
 
 def iso639_3_to_name(script: str) -> str:
@@ -106,8 +107,9 @@ def license_id_to_name(script: str) -> str:
     return _licenses[script]['title']
 
 ###############################################################################
-### Mapping between various IDs
+# Mapping between various IDs
 ###############################################################################
+
 
 def _doi_to_oai_id(doi: str) -> str:
     """
@@ -136,7 +138,7 @@ def _doi_to_zenodo_id(doi: str) -> str:
 
 
 ###############################################################################
-### String helpers 
+# String helpers
 ###############################################################################
 
 

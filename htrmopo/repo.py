@@ -17,20 +17,22 @@ Accessors to the v2 model repository on zenodo.
 """
 import yaml
 import uuid
+import pickle
 import logging
 import requests
 
-from collections import defaultdict
-from contextlib import closing
-from pathlib import Path
+from lxml import etree
 from sickle import Sickle
-from urllib.parse import urlsplit
-from platformdirs import user_data_dir
+from pathlib import Path
+from flufl.lock import Lock
+from contextlib import closing
 from jsonschema import validate
+from collections import defaultdict
+from urllib.parse import urlsplit
+from platformdirs import user_data_dir, user_cache_dir
 from dateutil.parser import parse as date_parse
 
 from typing import TYPE_CHECKING, Any, Callable, Optional, Literal, Union, Dict
-
 
 from htrmopo.record import DCATRecord, v0RepositoryRecord, v1RepositoryRecord
 from htrmopo.util import (_yaml_regex, _v1_schema, _v0_schema, _doi_to_oai_id,
@@ -122,7 +124,7 @@ def get_model(model_id: str,
     if path is not None:
         path = Path(path).resolve()
     else:
-        path = Path(user_data_dir('htrmopo')) / str(uuid.uuid5(uuid.NAMESPACE_DNS, model_id))
+        path = Path(user_data_dir('htrmopo')) / str(uuid.uuid5(uuid.NAMESPACE_DNS, record.metadata['doi']))
 
     if path.exists():
         if abort_if_exists:
@@ -156,6 +158,9 @@ def get_description(model_id: str,
     """
     Fetches the metadata for a single model from the zenodo repository.
 
+    Descriptions are cached whenever possible but fetching the description of a
+    single record still requires one or two HTTP requests.
+
     Args:
         model_id: DOI of the model.
         callback: Optional function called once per HTTP request.
@@ -178,6 +183,25 @@ def get_description(model_id: str,
         real_oai_id = _doi_to_oai_id(r.json()['doi'])
         record = sickle.GetRecord(identifier=real_oai_id, metadataPrefix='dcat')
 
+    # look up model in cache
+    cache_path = Path(user_cache_dir('htrmopo'))
+    cache_path.mkdir(parents=True, exist_ok=True)
+    desc_cache = cache_path / f"{uuid.uuid5(uuid.NAMESPACE_DNS, record.metadata['doi'])}.pkl"
+    publication_date = date_parse(record.header.datestamp)
+
+    if desc_cache.exists():
+        # metadata can be updated without creating a new record so we need to
+        # verify that our cache is newer than the date stamp in OAI-PMH record.
+        try:
+            with Lock(str(desc_cache.with_suffix('.lock'))), open(desc_cache, 'rb') as fp:
+                cache_record = pickle.load(fp)
+            logger.info(f'Found cache with last response datestamp {cache_record.publication_date} ({"not " if cache_record.publication_date >= publication_date else ""}updating)')
+            if cache_record.publication_date >= publication_date:
+                return cache_record
+        except Exception:
+            raise
+            logger.warning(f'Cache exists at {desc_cache} but is invalid.')
+
     callback()
     repo_record = None
     for file in record.metadata['distribution']:
@@ -191,7 +215,7 @@ def get_description(model_id: str,
             r = requests.get(file['url'])
             r.raise_for_status()
             metadata = record.metadata.copy()
-            metadata['publication_date'] = date_parse(record.header.datestamp)
+            metadata['publication_date'] = publication_date
             try:
                 repo_record = _build_v1_record(metadata, r.content.decode('utf-8'))
             except Exception as e:
@@ -203,7 +227,7 @@ def get_description(model_id: str,
             r = requests.get(file['url'])
             r.raise_for_status()
             metadata = record.metadata.copy()
-            metadata['publication_date'] = date_parse(record.header.datestamp)
+            metadata['publication_date'] = publication_date
             try:
                 repo_record = _build_v0_record(metadata, r)
             except Exception as e:
@@ -211,26 +235,68 @@ def get_description(model_id: str,
 
     if not repo_record:
         raise ValueError(f"No metadata found for \'{model_id}\'")
+
+    # write cache
+    with Lock(str(desc_cache.with_suffix('.lock'))), open(desc_cache, 'wb') as fp:
+        pickle.dump(repo_record, fp)
     return repo_record
 
 
 def get_listing(callback: Callable[[int, int], Any] = lambda total, advance: None,
-                from_date: Optional[str] = None) -> Dict[str, Dict[str, Union[v0RepositoryRecord, v1RepositoryRecord]]]:
+                **kwargs) -> Dict[str, Dict[str, Union[v0RepositoryRecord, v1RepositoryRecord]]]:
     """
     Fetches a listing of all models from the zenodo repository.
 
+    Listings are cached so that only new metadata records need to be retrieved
+    on subsequent calls. When filters for selective harvesting are defined in
+    **kwargs caching (both reading and updating) is disabled as we cannot
+    reproduce the effects of all harvesting selectors reliably on the client
+    side. In cases such as frequent repository querying it is recommended to
+    perform filtering on the client side.
+
+    Even with caching at least one HTTP request is emitted by this function.
+
     Args:
         callback: Function called for each processed record.
-        from_date: Lower limit of time stamp to harvest.
+        **kwargs: Any optional OAI-PMH filters for selective harvesting.
 
     Returns:
         Dict of models with each model.
     """
     items = defaultdict(dict)
+    # check if listing is already in cache
+    cache_path = Path(user_cache_dir('htrmopo'))
+    cache_path.mkdir(parents=True, exist_ok=True)
+    listing_cache = cache_path / 'listing.pkl'
+    logger.info(f'Checking for existence of cache file in {listing_cache}')
+    enable_cache_write = True
+    if kwargs:
+        logger.info('Disabling cache because selectors given.')
+        enable_cache_write = False
+    elif listing_cache.exists():
+        try:
+            with Lock(str(listing_cache.with_suffix('.lock'))), open(listing_cache, 'rb') as fp:
+                cache = pickle.load(fp)
+            kwargs = {'from': cache['from_date']}
+            items = cache['content']
+            logger.info(f'Found cache with last response datestamp {cache["from_date"]}')
+        except Exception:
+            logger.warning(f'Cache exists at {listing_cache} but is invalid.')
+    else:
+        logger.info('No cache found. Populating repository from scratch.')
     # get all identiifers first just to get total number of items in repository
-    total = len(list(sickle.ListIdentifiers(metadataPrefix='dcat', set='user-ocr_models', **{'from': from_date})))
+    try:
+        total = len(list(sickle.ListIdentifiers(metadataPrefix='dcat', set='user-ocr_models', **kwargs)))
+    except requests.HTTPError as e:
+        oai_resp = etree.fromstring(e.response.content)
+        if (error := oai_resp.find('.//{*}error')) is not None and error.get('code') != 'noRecordsMatch':
+            raise e
+        else:
+            return dict(items)
     callback(total, 0)
-    for record in sickle.ListRecords(metadataPrefix='dcat', set='user-ocr_models', **{'from': from_date}):
+    records = sickle.ListRecords(metadataPrefix='dcat', set='user-ocr_models', **kwargs)
+    response_date = records.oai_response.xml.find('./{*}responseDate').text
+    for record in records:
         doi = urlsplit(record.metadata['doi']).path[1:]
         for file_url in record.metadata['distribution']:
             if file_url['url'].endswith('README.md'):  # v1 model
@@ -252,4 +318,10 @@ def get_listing(callback: Callable[[int, int], Any] = lambda total, advance: Non
                 except Exception as e:
                     logger.info(f'Invalid metadata for {doi}: {e}')
         callback(total, 1)
+    logger.info(f'Writing cache file with new response datestamp {response_date}')
+    if enable_cache_write:
+        with Lock(str(listing_cache.with_suffix('.lock'))), open(listing_cache, 'wb') as fp:
+            cache = {'from_date': response_date,
+                     'content': items}
+            pickle.dump(cache, fp)
     return dict(items)

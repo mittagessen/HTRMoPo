@@ -91,25 +91,37 @@ def _build_v1_record(metadata, model_card):
 
 def get_model(model_id: str,
               path: Optional[Union[str, 'PathLike']] = None,
-              callback: Callable[[int, int], Any] = lambda total, advance: None,
-              abort_if_exists: bool = False) -> 'PathLike':
+              callback: Callable[[int, int], Any] = lambda total, advance: None) -> 'PathLike':
     """
-    Retrieves a model and their files to a path.
+    Retrieves a model and its files to a path.
+
+    When path is None and the model has already been downloaded once it will be
+    served out of the cache. Custom output paths are never cached.
 
     Args:
         model_id: DOI of the model
         path: Optional destination path to write model to. If none is given a
               new one will be created in the htrmopo data dir.
         callback: Function called for every 1024 octet chunk received.
-        version: Which version of the metadata should be returned if more than
-                 one exists. Per default the newest is returned.
 
     Returns:
         The output path under which the model files have been placed.
     """
-    logger.info(f'Saving model {model_id} to {path}')
     if (oai_id := _doi_to_oai_id(model_id)) is None:
         raise ValueError(f'{model_id} is not a valid DOI')
+
+    # check cache before resolving potential concept DOIs to economize on HTTP requests.
+    if path is not None:
+        logging.info(f'Custom download path selected. Disabling caching.')
+        use_cache = False
+        path = Path(path).resolve()
+    else:
+        use_cache = True
+        path = Path(user_data_dir('htrmopo')) / str(uuid.uuid5(uuid.NAMESPACE_DNS, model_id))
+        if path.exists():
+            logging.info(f'Found {model_id} in cache. Do not redownload.')
+            return path
+
     try:
         record = sickle.GetRecord(identifier=oai_id, metadataPrefix='dcat')
     except requests.HTTPError:
@@ -120,19 +132,15 @@ def get_model(model_id: str,
         model_id = r.json()['doi']
         real_oai_id = _doi_to_oai_id(model_id)
         record = sickle.GetRecord(identifier=real_oai_id, metadataPrefix='dcat')
-
-    if path is not None:
-        path = Path(path).resolve()
-    else:
-        path = Path(user_data_dir('htrmopo')) / str(uuid.uuid5(uuid.NAMESPACE_DNS, record.metadata['doi']))
-
-    if path.exists():
-        if abort_if_exists:
-            raise ValueError(f'Output path {path} already exists.')
-        else:
-            logger.warning(f'Output path {path} already exists.')
+        if use_cache:
+            logging.info(f'Using cache and concept ID resolved to {model_id}. Checking cache again.')
+            path = Path(user_data_dir('htrmopo')) / str(uuid.uuid5(uuid.NAMESPACE_DNS, model_id))
+            if path.exists():
+                logging.info(f'Found {model_id} in cache.')
+                return path
 
     path.mkdir(parents=True, exist_ok=True)
+    logger.info(f'Saving model {model_id} to {path}')
 
     callback(0, 0)
     metadata = record.metadata
@@ -159,7 +167,8 @@ def get_description(model_id: str,
     Fetches the metadata for a single model from the zenodo repository.
 
     Descriptions are cached whenever possible but fetching the description of a
-    single record still requires one or two HTTP requests.
+    single record still requires one or three HTTP requests for record and
+    concept DOIs respectively.
 
     Args:
         model_id: DOI of the model.

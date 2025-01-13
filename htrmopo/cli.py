@@ -214,7 +214,7 @@ def get(ctx, output, model_id):
         filename = get_model(model_id,
                              output,
                              lambda total, advance: progress.update(download_task, total=total, advance=advance))
-    message(f'Model name: {filename}')
+    print(f'Model path: {filename}')
     ctx.exit(0)
 
 

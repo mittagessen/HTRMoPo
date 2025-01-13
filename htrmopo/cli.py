@@ -161,15 +161,24 @@ def list_models(ctx, from_date):
     """
     from htrmopo import get_listing
 
+    kwargs = {}
+    if from_date is not None:
+        kwargs['from'] = from_date
+
     with Progress() as progress:
         download_task = progress.add_task('Retrieving model list', total=0, visible=True)
-        repository = get_listing(lambda total, advance: progress.update(download_task, total=total, advance=advance), from_date=from_date)
+        repository = get_listing(lambda total, advance: progress.update(download_task, total=total, advance=advance), **kwargs)
+
     # aggregate models under their concept DOI
     concepts = defaultdict(list)
     for item in repository.values():
         # both got the same DOI information
-        record = item['v0'] if item['v0'] else item['v1']
-        concepts[record.concept_doi].append(record.doi)
+        record = item.get('v1', item.get('v0', None))
+        if record is not None:
+            concepts[record.concept_doi].append(record)
+
+    for k, v in concepts.items():
+        concepts[k] = sorted(v, key=lambda x: x.publication_date, reverse=True)
 
     table = Table(show_header=True)
     table.add_column('DOI', justify="left", no_wrap=True)
@@ -177,9 +186,7 @@ def list_models(ctx, from_date):
     table.add_column('model type', justify="left", no_wrap=False)
     table.add_column('keywords', justify="left", no_wrap=False)
 
-    for k, v in concepts.items():
-        records = [repository[x]['v1'] if 'v1' in repository[x] else repository[x]['v0'] for x in v]
-        records = sorted(records, key=lambda x: x.publication_date, reverse=True)
+    for k, records in concepts.items():
         t = Tree(k)
         [t.add(x.doi) for x in records]
         table.add_row(t,

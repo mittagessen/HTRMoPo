@@ -112,7 +112,7 @@ def get_model(model_id: str,
 
     # check cache before resolving potential concept DOIs to economize on HTTP requests.
     if path is not None:
-        logging.info(f'Custom download path selected. Disabling caching.')
+        logging.info('Custom download path selected. Disabling caching.')
         use_cache = False
         path = Path(path).resolve()
     else:
